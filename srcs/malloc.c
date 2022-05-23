@@ -2,5 +2,6 @@
 
 void		*malloc(size_t size)
 {
-	printf("%d\n", size);
+	printf("%zu\n", size);
+	return (NULL);
 }

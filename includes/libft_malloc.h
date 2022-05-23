@@ -1,6 +1,6 @@
 #ifndef LIBFT_MALLOC
-# define LIFFT_MALLOC
+# define LIBFT_MALLOC
 
-# include "../libft/include/libft.h"
+# include "../libft/includes/libft.h"
 
 #endif

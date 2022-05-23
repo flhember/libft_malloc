@@ -1,10 +1,15 @@
+ifeq ($(HOSTTYPE),)
+HOSTTYPE := $(shell uname -m)_$(shell uname -s)
+endif
+
 
 NAME 	= libft_malloc_$(HOSTTYPE).so
-CC 	= clang
 
-CFLAGS 	+= -Wall
-CFLAGS 	+= -Wextra
-CFLAGS 	+= -Werror
+CC 	= gcc
+
+FLAGS	 = -Wall -fpic
+
+FLAGS_LIB = -shared -WL,-soname,$(NAME).1
 
 #-------------------------------------COLOR VARIABLE----------------------------#
 
@@ -29,38 +34,39 @@ LIB_BIN			= libft.a
 
 SRC_PATH  = ./srcs/
 OBJ_PATH  = ./obj/
-LIB_PATH  = ./Libft/
+LIB_PATH  = ./libft/
 INC_PATH  = ./includes/
 
 SRC_FILES = $(LIBFT_MALLOC_FILES:%=%.c)
 OBJ_FILES = $(SRC_FILES:.c=.o)
 
+INC = $(addprefix $(INC_PATH), $(LIBFT_MALLOC_INC_FILES))
+OBJ = $(patsubst %.c, $(OBJ_PATH)%.o, $(SRC_FILES))
+LIB = $(addprefix $(LIB_PATH), $(LIB_BIN))
 #------------------------------------------RULES--------------------------------#
 
-LIB_FILES = libft_malloc.h
-LIB = $(addprefix $(LIB_PATH), $(LIB_FILES))
-LIB_HEADER = $(addprefix $(LIB_PATH), $(INC_PATH))
-
-OBJ_FILES = $(SRC_FILES:.c=.o)
-	OBJ_EXEC = $(addprefix $(OBJ_PATH), $(OBJ_FILES))
-
 all: $(NAME)
+
+
+lib: $(LIB)
+
+$(LIB):
+	@make -C $(LIB_PATH)
+
 
 $(OBJ_PATH):
 	@mkdir $(OBJ_PATH)
 
 $(OBJ_PATH)%.o: $(SRC_PATH)%.c
-	@$(CC) $(FLAGS) -c $< -o $@ -I $(INC_PATH) -I $(LIB_HEADER)
+	@$(CC) $(FLAGS) -c -I $(INC_PATH) -l $(LIB) $< -o $@
 	@echo "\033[40mCompilation of \033[1m$(notdir $<)\033[0m \033[32mdone.\033[0m"
 
-$(LIB):
-	@make -C $(LIB_PATH)
 
-$(NAME): $(LIB) $(OBJ_PATH) $(OBJ_EXEC)
-	@cp libft/libft.a $(NAME)
-	@ar rc $(NAME) $(OBJ_EXEC)
-	@ranlib $(NAME)
+$(NAME): $(INC) $(LIB) $(OBJ_PATH) $(OBJ)
+	#@$(CC) $(FLAGS_LIB) $(OBJ) $(LIB) -o $(NAME) -I $(INC_PATH) -lc
+	@$(CC) -fpic $(OBJ) $(FLAGS_LIB) -o $(NAME)
 	@echo "\033[1;32m$(notdir $(NAME))\033[1;0m\033[32m created.\033[0m"
+
 
 clean:
 	@/bin/rm -rf $(OBJ_PATH)
