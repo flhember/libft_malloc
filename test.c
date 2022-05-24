@@ -1,7 +1,11 @@
-#include "libft_malloc.so"
+#include "libft_malloc.h"
+#include <stdio.h>
 
 int	main(void)
 {
-i	malloc(22);
+	int 	test;
+	
+	test = ft_malloc(0);
+	printf("%d\n", test);
 	return (0);
 }

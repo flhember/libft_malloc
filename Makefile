@@ -7,9 +7,11 @@ NAME 	= libft_malloc_$(HOSTTYPE).so
 
 CC 	= gcc
 
-FLAGS	 = -Wall -fpic
+FLAGS	 = -Wall -Werror -Wextra -fpic
+#FLAGS 	+= -g3 
+#FLAGS 	+=-fsanitize=address
 
-FLAGS_LIB = -shared -WL,-soname,$(NAME).1
+FLAGS_LIB = -shared 
 
 #-------------------------------------COLOR VARIABLE----------------------------#
 
@@ -28,54 +30,53 @@ end	= $ \033[0m
 
 LIBFT_MALLOC_FILES 	= malloc
 LIBFT_MALLOC_INC_FILES 	= libft_malloc.h
-LIB_BIN			= libft.a
+TEST_FILE		= test.c
 
 #--------------------------------------PATH/FILES-------------------------------#
 
 SRC_PATH  = ./srcs/
 OBJ_PATH  = ./obj/
-LIB_PATH  = ./libft/
 INC_PATH  = ./includes/
+LIB_PATH  = ./lib/
 
 SRC_FILES = $(LIBFT_MALLOC_FILES:%=%.c)
 OBJ_FILES = $(SRC_FILES:.c=.o)
 
 INC = $(addprefix $(INC_PATH), $(LIBFT_MALLOC_INC_FILES))
 OBJ = $(patsubst %.c, $(OBJ_PATH)%.o, $(SRC_FILES))
-LIB = $(addprefix $(LIB_PATH), $(LIB_BIN))
+
 #------------------------------------------RULES--------------------------------#
 
 all: $(NAME)
-
-
-lib: $(LIB)
-
-$(LIB):
-	@make -C $(LIB_PATH)
-
 
 $(OBJ_PATH):
 	@mkdir $(OBJ_PATH)
 
 $(OBJ_PATH)%.o: $(SRC_PATH)%.c
-	@$(CC) $(FLAGS) -c -I $(INC_PATH) -l $(LIB) $< -o $@
+	@$(CC) $(FLAGS) -c -I $(INC_PATH) $< -o $@
 	@echo "\033[40mCompilation of \033[1m$(notdir $<)\033[0m \033[32mdone.\033[0m"
 
 
-$(NAME): $(INC) $(LIB) $(OBJ_PATH) $(OBJ)
-	#@$(CC) $(FLAGS_LIB) $(OBJ) $(LIB) -o $(NAME) -I $(INC_PATH) -lc
-	@$(CC) -fpic $(OBJ) $(FLAGS_LIB) -o $(NAME)
+$(NAME): $(OBJ_PATH) $(INC) $(OBJ)
+	@$(CC) -o $(NAME) $(OBJ) $(FLAGS_LIB)
 	@echo "\033[1;32m$(notdir $(NAME))\033[1;0m\033[32m created.\033[0m"
+	@mkdir $(LIB_PATH)
+	@ln -fs libft_malloc_x86_64_Linux.so libft_malloc.so
+	@mv $(NAME) $(LIB_PATH)
+	@mv libft_malloc.so $(LIB_PATH)
+	@export LD_LIBRARY_PATH=$(pwd)
+	@echo "\033[1;32mlibft_malloc.so\033[1;0m\033[32m linked.\033[0m"
 
+test:
+	gcc $(TEST_FILE) -o test -lft_malloc -I includes -L lib
 
 clean:
 	@/bin/rm -rf $(OBJ_PATH)
-	@make clean -C $(LIB_PATH)
 	@echo "\033[31mObjects files of \033[1;31m$(notdir $(NAME))\033[1;0m\033[31m removed.\033[0m"
 
 fclean: clean
-	@make fclean -C $(LIB_PATH)
 	@/bin/rm -rf $(NAME)
+	@/bin/rm -rf $(LIB_PATH)
 	@echo "\033[1;31m$(notdir $(NAME))\033[1;0m\033[31m removed.\033[0m"
 
 re: fclean all
