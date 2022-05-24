@@ -3,9 +3,6 @@
 
 int	main(void)
 {
-	int 	test;
-	
-	test = ft_malloc(0);
-	printf("%d\n", test);
+	ft_malloc(140);
 	return (0);
 }

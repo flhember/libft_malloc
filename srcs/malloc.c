@@ -1,9 +1,8 @@
 #include "libft_malloc.h"
+#include <stdio.h>
 
-int	ft_malloc(size_t size)
+void	*ft_malloc(size_t size)
 {
-	if (size) {
-		return (1);
-	}
-	return (0);
+	printf("size = %zu\n", size);
+	return (NULL);
 }
