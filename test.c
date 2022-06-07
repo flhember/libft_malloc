@@ -1,8 +1,7 @@
-#include "libft_malloc.h"
-#include <stdio.h>
+#include "includes/libft_malloc.h"
 
 int	main(void)
 {
-	ft_malloc(140);
+	ft_malloc(10);
 	return (0);
 }

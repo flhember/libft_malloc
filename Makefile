@@ -2,12 +2,13 @@ ifeq ($(HOSTTYPE),)
 HOSTTYPE := $(shell uname -m)_$(shell uname -s)
 endif
 
+#----------------------------------------VARIABLE-------------------------------#
 
 NAME 	= libft_malloc_$(HOSTTYPE).so
 
 CC 	= gcc
 
-FLAGS	 = -Wall -Werror -Wextra -fpic
+FLAGS	 = -fpic
 #FLAGS 	+= -g3 
 #FLAGS 	+=-fsanitize=address
 
@@ -28,7 +29,7 @@ end	= $ \033[0m
 
 #-----------------------------------------SRC/INC-------------------------------#
 
-LIBFT_MALLOC_FILES 	= malloc
+LIBFT_MALLOC_FILES 	= malloc 
 LIBFT_MALLOC_INC_FILES 	= libft_malloc.h
 TEST_FILE		= test.c
 
@@ -64,10 +65,11 @@ $(NAME): $(OBJ_PATH) $(INC) $(OBJ)
 	@ln -fs libft_malloc_x86_64_Linux.so libft_malloc.so
 	@mv $(NAME) $(LIB_PATH)
 	@mv libft_malloc.so $(LIB_PATH)
-	@export LD_LIBRARY_PATH=$(pwd)
+	export LD_LIBRARY_PATH=$(PWD)/lib
 	@echo "\033[1;32mlibft_malloc.so\033[1;0m\033[32m linked.\033[0m"
 
-test:
+test: $(TEST_FILE)
+	export LD_LIBRARY_PATH=$(shell pwd)/lib
 	gcc $(TEST_FILE) -o test -lft_malloc -I includes -L lib
 
 clean:
