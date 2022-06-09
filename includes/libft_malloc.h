@@ -22,6 +22,10 @@ typedef struct	s_block {
 	int	free;
 } t_block;
 
+//Global Variable, -> addr heap if is set.
+extern void    *heap_addr;
+
 void	*ft_malloc(size_t size);
+void 	ft_free(void *ptr);
 
 #endif

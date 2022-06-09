@@ -2,7 +2,11 @@
 
 int	main(void)
 {
-	ft_malloc(10);
+	void	*addr;
+
+
+	ft_free(addr);
+	addr = ft_malloc(10);
 	ft_malloc(20);
 	ft_malloc(30);
 	ft_malloc(40);

@@ -1,6 +1,6 @@
 #include "libft_malloc.h"
 
-void	*heap_addr = NULL;
+void    *heap_addr;
 
 void	*request_space(size_t size)
 {
