@@ -2,13 +2,12 @@
 
 int	main(void)
 {
-	void	*addr;
-
-
-	ft_free(addr);
-	addr = ft_malloc(10);
-	ft_malloc(20);
-	ft_malloc(30);
-	ft_malloc(40);
+	ft_malloc(10);
+	ft_malloc(10);
+	ft_malloc(10);
+	ft_malloc(10);
+	//ft_malloc(4096);
+	//ft_malloc(7000);
+	//ft_malloc(100000);
 	return (0);
 }

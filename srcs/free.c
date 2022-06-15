@@ -1,6 +1,6 @@
 #include "libft_malloc.h"
 
-void	find_block(void *ptr)
+/*void	find_block(void *ptr)
 {
 	t_header        *heap = heap_addr;
 	t_block         *alloc = heap_addr + sizeof(t_header);
@@ -14,7 +14,7 @@ void	find_block(void *ptr)
 		}
 		alloc = alloc->next;
 	}
-}
+}*/
 
 void 	ft_free(void *ptr)
 {
@@ -22,5 +22,5 @@ void 	ft_free(void *ptr)
 	printf("addr a free %p\n", ptr);
 	if (!ptr || !heap_addr)
 		return ;
-	find_block(ptr);
+//	find_block(ptr);
 }

@@ -1,6 +1,9 @@
 #ifndef LIBFT_MALLOC
 # define LIBFT_MALLOC
 
+#define TINY	4096
+#define SMALL	4096 * 6
+
 #include <stdio.h>
 #include <stddef.h>
 #include <unistd.h>
@@ -11,19 +14,19 @@ typedef struct	s_header {
 	struct	s_header *prev;
 	struct	s_header *next;
 	size_t	size_total;
-	size_t	count_block;
-} t_header;
+}	t_header;
 
-//data of block for witch malloc call
+//data of block for all malloc call
 typedef struct	s_block {
 	struct	s_block *prev;
 	struct	s_block *next;
 	size_t	data_size;
 	int	free;
-} t_block;
+	int	last;
+}	t_block;
 
 //Global Variable, -> addr heap if is set.
-extern void    *heap_addr;
+extern	t_header	*heap_addr[3];
 
 void	*ft_malloc(size_t size);
 void 	ft_free(void *ptr);
