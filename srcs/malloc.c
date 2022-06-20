@@ -44,6 +44,21 @@ t_header	*heap_addr[3];
 */
 //-----------------------------------------------------------------------------------//
 
+void		print_header_content(t_header *head)
+{
+	t_block		*alloc = (void *)head + sizeof(t_header);
+	while (alloc)
+	{
+		printf("+------------------------------------------+\n");
+		printf("+--------------%p--------------+\n", alloc);
+		printf("+prev %14p | next %14p +\n", alloc->prev, alloc->next);
+		printf("+------------------------------------------+\n");
+		printf("\t\tsize = %zu \n", alloc->data_size);
+		printf("+------------------------------------------+\n\n");
+		alloc = alloc->next;
+	}
+}
+
 void		print_header_zone(int zone)
 {
 	t_header	*head = heap_addr[zone];
@@ -71,9 +86,21 @@ with space for user
 */
 void	*create_block(t_header *head, size_t size, int zone)
 {
+	void		*last_addr = NULL;
+	t_block		*alloc = (void *)head + sizeof(t_header);
 
-	//while (alloc->next && (void *)alloc->next < (void *)(heap_addr + heap->size_total) - ((void *)sizeof(t_block) + size))
-
+	print_header_zone(zone);
+	while (alloc->next && (void *)alloc->next < (void *)(head + head->size_total) - ((void *)sizeof(t_block) + size))
+	{
+		last_addr = alloc;
+		alloc = alloc->next;
+	}
+	alloc->prev = last_addr;
+	alloc->next = (void *)alloc + sizeof(t_block) + size;
+	alloc->data_size = size;
+	alloc->free = 0;
+	print_header_content(head);
+	return ((void *)alloc + sizeof(t_block));
 }
 
 
@@ -92,7 +119,7 @@ void	*create_space(size_t size, int zone)
 		addr_prev = head;
 		head = head->next;
 	}
-	size_header = getpagesize();
+	size_header = getpagesize() * 2; // size a fix
 	if ((head = mmap(NULL, size_header, (PROT_READ | PROT_WRITE), (MAP_PRIVATE | MAP_ANONYMOUS), 0, 0)) == MAP_FAILED) {
 		perror("mmap");
 		return (NULL);
@@ -120,13 +147,10 @@ t_header	*find_header(size_t size, int zone)
 	while (head)
 	{
 		chunk = (void *)head + sizeof(t_header);
-		while (chunk->next || chunk->prev)
-		{
-			printf("OUI!\n");
+		while (chunk->next)
 			chunk = chunk->next;
-			if (chunk->last == 1 && ) // && qu'il y a de la place
-				return (head);
-		}
+		if (head->size_total > chunk->next + size)
+			return (head);
 		head = head->next;
 	}
 	return (NULL);
@@ -156,8 +180,8 @@ Then put chunk with  block header and zone for user.
 void	*find_space(size_t size, int zone)
 {
 	t_header	*head = NULL;
-
-	printf("zone = %d size = %zu\n", zone, size);
+	
+	printf("zone = %d\n", zone);
 	if (!(head = find_header(size, zone)))
 		head = create_space(size, zone);
 	return (create_block(head, size, zone));
