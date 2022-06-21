@@ -2,48 +2,8 @@
 
 t_header	*heap_addr[3];
 
-/*void	*request_space(size_t size)
-{
-	void		*addr = NULL;
-	int 		sizePage = 0;
-	t_header	*heap;
-
-	sizePage = getpagesize();
-	printf("size pag = %d\n", sizePage);
-	if ((addr = mmap(NULL, sizePage, (PROT_READ | PROT_WRITE), (MAP_PRIVATE | MAP_ANONYMOUS), 0, 0)) == MAP_FAILED) {
-		perror("mmap");
-		return (NULL);
-	}
-	heap = addr;
-	heap->prev = NULL;
-	heap->next = NULL;
-	heap->size_total = sizePage;
-	printf("heap addr = %p heap struct size = %zu\n\n", addr, sizeof(t_header));
-	return (addr);
-}*/
-
-/*void	*find_bloc(size_t size)
-{
-	t_header	*heap = heap_addr;
-	t_block		*alloc = heap_addr + sizeof(t_header);
-	void		*last_addr = NULL;
-
-	while (alloc->next && (void *)alloc->next < (void *)(heap_addr + heap->size_total) - ((void *)sizeof(t_block) + size))
-	{
-		last_addr = alloc;
-		alloc = alloc->next;
-	}
-	alloc->prev = last_addr;
-	alloc->next = (void *)alloc + sizeof(t_block) + size;
-	alloc->data_size = size;
-	alloc->free = 0;
-	printf("last = %p | next = %p\n", alloc->prev, alloc->next);
-	printf("|%p|header 0x20|Addr return %p, data size = %zu|\n\n", alloc, (void *)alloc + sizeof(t_block),size);
-	return ((void *)alloc + sizeof(t_block));
-}
-*/
-//-----------------------------------------------------------------------------------//
-
+/* -------------------- */
+/*	Debug ft	*/
 void		print_header_content(t_header *head)
 {
 	t_block		*alloc = (void *)head + sizeof(t_header);
@@ -73,6 +33,13 @@ void		print_header_zone(int zone)
 	}
 }
 
+/* -------------------- */
+
+
+
+/*
+Return first header.
+*/
 t_header	*find_first_header(t_header *head)
 {
 	while (head->prev)
@@ -81,8 +48,7 @@ t_header	*find_first_header(t_header *head)
 }
 
 /*
-Now we have a header with some space, so create block
-with space for user
+Function to create block with space for user.
 */
 void	*create_block(t_header *head, size_t size, int zone)
 {
@@ -90,7 +56,7 @@ void	*create_block(t_header *head, size_t size, int zone)
 	t_block		*alloc = (void *)head + sizeof(t_header);
 
 	print_header_zone(zone);
-	while (alloc->next && (void *)alloc->next < (void *)(head + head->size_total) - ((void *)sizeof(t_block) + size))
+	while (alloc->next && (void *)alloc->next < (void *)(head + head->size_total - (sizeof(t_block) + size)))
 	{
 		last_addr = alloc;
 		alloc = alloc->next;
@@ -101,6 +67,32 @@ void	*create_block(t_header *head, size_t size, int zone)
 	alloc->free = 0;
 	print_header_content(head);
 	return ((void *)alloc + sizeof(t_block));
+}
+
+
+/*
+Need multiple of getpagesize for size of area.
+*/
+size_t	find_multiple_page_size(size_t size)
+{
+	int size_page = getpagesize();
+
+	while (size_page < size)
+		size_page += getpagesize();
+	return (size_page);
+}
+
+/*
+Find size of area
+*/
+size_t	find_good_size(size_t size, int zone)
+{
+	if (zone == 0)
+		return (find_multiple_page_size(((TINY_MAX + sizeof(t_block)) * 100) + sizeof(t_header)));
+	else if (zone == 1)
+		return (find_multiple_page_size(((SMALL_MAX + sizeof(t_block)) * 100) + sizeof(t_header)));
+	else
+		return (find_multiple_page_size(size + sizeof(t_block) + sizeof(t_header)));
 }
 
 
@@ -119,7 +111,11 @@ void	*create_space(size_t size, int zone)
 		addr_prev = head;
 		head = head->next;
 	}
-	size_header = getpagesize() * 2; // size a fix
+	size_header = find_good_size(size, zone);
+	printf("SIZE = %zu\n", size_header);
+	printf("SIZE GET PAGE = %d\n", getpagesize());
+	printf("SIZE bloc = %zu, size header = %zu\n", sizeof(t_block), sizeof(t_header));
+	//size_header = getpagesize() * (zone + 1); // size a fix
 	if ((head = mmap(NULL, size_header, (PROT_READ | PROT_WRITE), (MAP_PRIVATE | MAP_ANONYMOUS), 0, 0)) == MAP_FAILED) {
 		perror("mmap");
 		return (NULL);
@@ -149,7 +145,7 @@ t_header	*find_header(size_t size, int zone)
 		chunk = (void *)head + sizeof(t_header);
 		while (chunk->next)
 			chunk = chunk->next;
-		if (head->size_total > chunk->next + size)
+		if ((void *)(head->size_total) > (void *)(chunk->next + size))
 			return (head);
 		head = head->next;
 	}
@@ -165,9 +161,9 @@ Global Variable = Header_tab[Tiny, Small, Large]. Each on point to his first hea
 */
 int	find_good_zone(size_t size)
 {
-	if (size < TINY)
+	if (size <= TINY_MAX)
 		return (0);
-	else if (size < SMALL)
+	else if (size <= SMALL_MAX)
 		return (1);
 	else	
 		return (2);

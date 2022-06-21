@@ -31,7 +31,7 @@ end	= $ \033[0m
 
 LIBFT_MALLOC_FILES 	= malloc free
 LIBFT_MALLOC_INC_FILES 	= libft_malloc.h
-TEST_FILE		= test.c
+TEST_FILE		= test42.c
 
 #--------------------------------------PATH/FILES-------------------------------#
 

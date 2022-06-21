@@ -1,8 +1,8 @@
 #ifndef LIBFT_MALLOC
 # define LIBFT_MALLOC
 
-#define TINY	4096
-#define SMALL	4096 * 6
+#define TINY_MAX	1024
+#define SMALL_MAX	4096
 
 #include <stdio.h>
 #include <stddef.h>
