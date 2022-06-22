@@ -2,41 +2,6 @@
 
 t_header	*heap_addr[3];
 
-/* -------------------- */
-/*	Debug ft	*/
-void		print_header_content(t_header *head)
-{
-	t_block		*alloc = (void *)head + sizeof(t_header);
-	while (alloc)
-	{
-		printf("+------------------------------------------+\n");
-		printf("+--------------%p--------------+\n", alloc);
-		printf("+prev %14p | next %14p +\n", alloc->prev, alloc->next);
-		printf("+------------------------------------------+\n");
-		printf("\t\tsize = %zu \n", alloc->data_size);
-		printf("+------------------------------------------+\n\n");
-		alloc = alloc->next;
-	}
-}
-
-void		print_header_zone(int zone)
-{
-	t_header	*head = heap_addr[zone];
-
-	while (head)
-	{
-		printf("|------------------------------------------|\n");
-		printf("|--------------%p--------------|\n", head);
-		printf("|prev %14p | next %14p |\n", head->prev, head->next);
-		printf("|------------------------------------------|\n\n");
-		head = head->next;
-	}
-}
-
-/* -------------------- */
-
-
-
 /*
 Return first header.
 */
@@ -55,7 +20,6 @@ void	*create_block(t_header *head, size_t size, int zone)
 	void		*last_addr = NULL;
 	t_block		*alloc = (void *)head + sizeof(t_header);
 
-	print_header_zone(zone);
 	while (alloc->next && (void *)alloc->next < (void *)(head + head->size_total - (sizeof(t_block) + size)))
 	{
 		last_addr = alloc;
@@ -65,10 +29,8 @@ void	*create_block(t_header *head, size_t size, int zone)
 	alloc->next = (void *)alloc + sizeof(t_block) + size;
 	alloc->data_size = size;
 	alloc->free = 0;
-	print_header_content(head);
 	return ((void *)alloc + sizeof(t_block));
 }
-
 
 /*
 Need multiple of getpagesize for size of area.
@@ -95,7 +57,6 @@ size_t	find_good_size(size_t size, int zone)
 		return (find_multiple_page_size(size + sizeof(t_block) + sizeof(t_header)));
 }
 
-
 /*
 Create header if actualy not space available.
 */
@@ -112,9 +73,9 @@ void	*create_space(size_t size, int zone)
 		head = head->next;
 	}
 	size_header = find_good_size(size, zone);
-	printf("SIZE = %zu\n", size_header);
-	printf("SIZE GET PAGE = %d\n", getpagesize());
-	printf("SIZE bloc = %zu, size header = %zu\n", sizeof(t_block), sizeof(t_header));
+	//printf("SIZE = %zu\n", size_header);
+	//printf("SIZE GET PAGE = %d\n", getpagesize());
+	//printf("SIZE bloc = %zu, size header = %zu\n", sizeof(t_block), sizeof(t_header));
 	//size_header = getpagesize() * (zone + 1); // size a fix
 	if ((head = mmap(NULL, size_header, (PROT_READ | PROT_WRITE), (MAP_PRIVATE | MAP_ANONYMOUS), 0, 0)) == MAP_FAILED) {
 		perror("mmap");
@@ -177,7 +138,6 @@ void	*find_space(size_t size, int zone)
 {
 	t_header	*head = NULL;
 	
-	printf("zone = %d\n", zone);
 	if (!(head = find_header(size, zone)))
 		head = create_space(size, zone);
 	return (create_block(head, size, zone));
