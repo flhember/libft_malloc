@@ -46,12 +46,14 @@ size_t		print_zone(int zone)
 {
 	size_t		size_total = 0;
 	t_header	*head = heap_addr[zone];
-	t_block		*chunk = (void *)head + sizeof(t_header);
+	t_block		*chunk = NULL;
 	
 	if (head)
 		print_name_zone(zone, head);
 	while (head)
 	{
+		printf("start of area\n\n");
+		chunk = (void *)head + sizeof(t_header);
 		while (chunk->next)
 		{
 			printf("%p - %p : %zu octets\n", (void *)chunk + sizeof(t_block), chunk->next ,chunk->data_size);

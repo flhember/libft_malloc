@@ -3,14 +3,14 @@
 int	main()
 {
 	int	i;
-	int	j;
+	char	*addr;
 
 	i = 0;
-	j = 1000;
-	while (i < 100) {
-		ft_malloc(j);
+	while (i < 1024) {
+		addr = (char *)ft_malloc(1024);
+		addr[0] = 42;
 		i++;
-		j++;
 	}
+	show_alloc_mem();
 	return (0);
 }

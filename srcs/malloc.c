@@ -26,7 +26,14 @@ void	*create_block(t_header *head, size_t size, int zone)
 		alloc = alloc->next;
 	}
 	alloc->prev = last_addr;
-	alloc->next = (void *)alloc + sizeof(t_block) + size;
+	if ((void *)alloc + sizeof(t_block) + size > (void *)head + head->size_total) {
+		printf("last chunk in area\n");
+		alloc->next = NULL;
+		alloc->last = 1;
+	} else {
+		alloc->next = (void *)alloc + sizeof(t_block) + size;
+		alloc->last = 0;
+	}
 	alloc->data_size = size;
 	alloc->free = 0;
 	return ((void *)alloc + sizeof(t_block));
@@ -73,10 +80,6 @@ void	*create_space(size_t size, int zone)
 		head = head->next;
 	}
 	size_header = find_good_size(size, zone);
-	//printf("SIZE = %zu\n", size_header);
-	//printf("SIZE GET PAGE = %d\n", getpagesize());
-	//printf("SIZE bloc = %zu, size header = %zu\n", sizeof(t_block), sizeof(t_header));
-	//size_header = getpagesize() * (zone + 1); // size a fix
 	if ((head = mmap(NULL, size_header, (PROT_READ | PROT_WRITE), (MAP_PRIVATE | MAP_ANONYMOUS), 0, 0)) == MAP_FAILED) {
 		perror("mmap");
 		return (NULL);
@@ -99,14 +102,15 @@ t_header	*find_header(size_t size, int zone)
 {
 	t_header	*head;
 	t_block		*chunk;
-
+	int		i = 0;
 	head = heap_addr[zone];
 	while (head)
 	{
 		chunk = (void *)head + sizeof(t_header);
-		while (chunk->next)
+		while (chunk->next) {
 			chunk = chunk->next;
-		if ((void *)(head->size_total) > (void *)(chunk->next + size))
+		}
+		if ( (void *)head + head->size_total > (void *)chunk + size)
 			return (head);
 		head = head->next;
 	}
