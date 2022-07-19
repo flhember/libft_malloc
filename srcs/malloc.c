@@ -3,16 +3,6 @@
 t_header	*heap_addr[3];
 
 /*
-Return first header.
-*/
-t_header	*find_first_header(t_header *head)
-{
-	while (head->prev)
-		head = head->prev;
-	return (head);
-}
-
-/*
 Function to create block with space for user.
 */
 void	*create_block(t_header *head, size_t size, int zone)
@@ -25,43 +15,14 @@ void	*create_block(t_header *head, size_t size, int zone)
 		last_addr = alloc;
 		alloc = alloc->next;
 	}
-	alloc->prev = last_addr;
 	if ((void *)alloc + sizeof(t_block) + size > (void *)head + head->size_total) {
 		printf("last chunk in area\n");
 		alloc->next = NULL;
-		alloc->last = 1;
 	} else {
 		alloc->next = (void *)alloc + sizeof(t_block) + size;
-		alloc->last = 0;
 	}
 	alloc->data_size = size;
-	alloc->free = 0;
 	return ((void *)alloc + sizeof(t_block));
-}
-
-/*
-Need multiple of getpagesize for size of area.
-*/
-size_t	find_multiple_page_size(size_t size)
-{
-	int size_page = getpagesize();
-
-	while (size_page < size)
-		size_page += getpagesize();
-	return (size_page);
-}
-
-/*
-Find size of area
-*/
-size_t	find_good_size(size_t size, int zone)
-{
-	if (zone == 0)
-		return (find_multiple_page_size(((TINY_MAX + sizeof(t_block)) * 100) + sizeof(t_header)));
-	else if (zone == 1)
-		return (find_multiple_page_size(((SMALL_MAX + sizeof(t_block)) * 100) + sizeof(t_header)));
-	else
-		return (find_multiple_page_size(size + sizeof(t_block) + sizeof(t_header)));
 }
 
 /*
@@ -80,18 +41,19 @@ void	*create_space(size_t size, int zone)
 		head = head->next;
 	}
 	size_header = find_good_size(size, zone);
+	printf("size malloc = %zu \n", size_header);
 	if ((head = mmap(NULL, size_header, (PROT_READ | PROT_WRITE), (MAP_PRIVATE | MAP_ANONYMOUS), 0, 0)) == MAP_FAILED) {
 		perror("mmap");
 		return (NULL);
 	}
 	head->size_total = size_header;
-	head->prev = addr_prev;
 	head->next = NULL;
 	if (addr_prev) {
 		head_tmp = addr_prev;
 		head_tmp->next = head;
 	}
-	heap_addr[zone] = find_first_header(head);
+	if (!heap_addr[zone])
+		heap_addr[zone] = head;
 	return (head);
 }
 
@@ -103,6 +65,7 @@ t_header	*find_header(size_t size, int zone)
 	t_header	*head;
 	t_block		*chunk;
 	int		i = 0;
+
 	head = heap_addr[zone];
 	while (head)
 	{
@@ -115,23 +78,6 @@ t_header	*find_header(size_t size, int zone)
 		head = head->next;
 	}
 	return (NULL);
-}
-
-/*
-Find good zone:
-0 = Tiny
-1 = Small
-2 = Large
-Global Variable = Header_tab[Tiny, Small, Large]. Each on point to his first header.
-*/
-int	find_good_zone(size_t size)
-{
-	if (size <= TINY_MAX)
-		return (0);
-	else if (size <= SMALL_MAX)
-		return (1);
-	else	
-		return (2);
 }
 
 /*
@@ -160,4 +106,7 @@ void	*ft_malloc(size_t size)
     		return NULL;
 	request_addr = find_space(size, find_good_zone(size));
 	return (request_addr);
+	
+	//request_addr = mmap(NULL, size, (PROT_READ | PROT_WRITE), (MAP_PRIVATE | MAP_ANON), -1, 0);
+	//return (NULL);
 }

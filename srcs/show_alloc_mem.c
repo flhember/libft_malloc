@@ -9,7 +9,7 @@ void		print_header_content(t_header *head)
 	{
 		printf("+------------------------------------------+\n");
 		printf("+--------------%p--------------+\n", alloc);
-		printf("+prev %14p | next %14p +\n", alloc->prev, alloc->next);
+		printf("+prev %14p | next %14p +\n", NULL, alloc->next);
 		printf("+------------------------------------------+\n");
 		printf("\t\tsize = %zu \n", alloc->data_size);
 		printf("+------------------------------------------+\n\n");
@@ -25,7 +25,7 @@ void		print_header_zone(int zone)
 	{
 		printf("|------------------------------------------|\n");
 		printf("|--------------%p--------------|\n", head);
-		printf("|prev %14p | next %14p |\n", head->prev, head->next);
+		printf("|prev %14p | next %14p |\n", NULL, head->next);
 		printf("|------------------------------------------|\n\n");
 		head = head->next;
 	}

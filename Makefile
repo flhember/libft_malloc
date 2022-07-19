@@ -29,7 +29,7 @@ end	= $ \033[0m
 
 #-----------------------------------------SRC/INC-------------------------------#
 
-LIBFT_MALLOC_FILES 	= malloc free show_alloc_mem
+LIBFT_MALLOC_FILES 	= malloc free show_alloc_mem malloc_utils
 LIBFT_MALLOC_INC_FILES 	= libft_malloc.h
 TEST_FILE		= test42.c
 
